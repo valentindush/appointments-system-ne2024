@@ -1,8 +1,4 @@
 #include <iostream>
-#include <vector>
-#include <fstream>
-#include <sstream>
-#include <unordered_set>
 #include <algorithm>
 
 using namespace std;
@@ -35,7 +31,6 @@ public:
 };
 
 //Appointment Node
-
 class AppointmentNode{
 public:
     int appointment_id;
@@ -51,11 +46,14 @@ public:
 
 
 //LinkedLists
-
 //patients Linked List
 class PatientsLL{
 private:
     PatientNode* head;
+
+public:
+    PatientsLL() : head(nullptr){}
+
     PatientNode* findPatient(int patient_id) {
         PatientNode* current = head;
         while (current) {
@@ -65,9 +63,6 @@ private:
         }
         return nullptr;
     }
-
-public:
-    PatientsLL() : head(nullptr){}
 
     void addPatient(int patient_id, string name, string dob, string gender){
         //check if the id is taken
@@ -89,7 +84,7 @@ public:
             current->next = newPatient;
         }
 
-        cout << "Patient " << name << " added successfully." << endl;
+        cout << "Patient Registered successfully." << endl;
     }
 
     void displayPatients(){
@@ -105,6 +100,11 @@ public:
 class DoctorsLL{
 private:
     DoctorNode* head;
+
+public:
+
+    DoctorsLL(): head(nullptr){}
+
     DoctorNode* findDoctor(int doctor_id) {
         DoctorNode* current = head;
         while (current) {
@@ -114,9 +114,6 @@ private:
         }
         return nullptr;
     }
-public:
-    DoctorsLL(): head(nullptr){}
-
     void addDoctor(int doctor_id, string name, string specialization){
         // check if the id is taken
         DoctorNode* doctorExists = this->findDoctor(doctor_id);
@@ -139,10 +136,11 @@ public:
         cout<<"Doctor registered successfully"<<endl;
     }
 
-    void listDoctors(){
+    void displayDoctors(){
         DoctorNode *node = head;
         while (node != nullptr){
             cout<<"Doctor ID: "<<node->doctor_id<<",  Name: "<<node->name<<",  Specialization: "<<node->specialization<<endl;
+            node = node->next;
         }
     }
 };
@@ -151,6 +149,10 @@ public:
 class AppointmentsLL{
 private:
     AppointmentNode* head;
+
+public:
+    AppointmentsLL() : head(nullptr){}
+
     AppointmentNode* finAppointment(int appointment_id) {
         AppointmentNode* current = head;
         while (current) {
@@ -160,9 +162,14 @@ private:
         }
         return nullptr;
     }
-
     void addAppointment( int appointment_id, int doctor_id, int patient_id, string appointment_date){
-        //check if both doctor_id and patient_id exists
+        //check if appointment_id exists
+
+        AppointmentNode* appointmentExists = this->finAppointment(appointment_id);
+        if(appointmentExists != nullptr){
+            cerr<<"Appointment with the same ID exists"<<endl;
+            return;
+        }
 
         //create appointment
         AppointmentNode* newAppointment = new AppointmentNode(appointment_id, patient_id, doctor_id, appointment_date);
@@ -179,7 +186,7 @@ private:
         cout << "Appointment registered successfully"<<endl;
     }
 
-    void listAppointments(){
+    void displayAppointments(){
         AppointmentNode* node = head;
         while (node != nullptr){
             cout<<"Appointment ID: "<<node->appointment_id<<",  Patient ID: "<<node->patient_id<<",  Doctor ID: "<<node->doctor_id<<",  Date: "<<node->appointment_date<<endl;
@@ -188,7 +195,118 @@ private:
     }
 };
 
+void display_menu(){
+    cout<<"Menu: \n";
+    cout<<"1. Register a patient\n";
+    cout<<"2. Register a doctor \n";
+    cout<<"3. Register an appointment\n";
+    cout<<"4. Display Patients\n";
+    cout<<"5. Display Doctors\n";
+    cout<<"6. Display Appointments\n";
+    cout<<"7. Exit\n";
+}
+
 int main() {
-    cout << "HEALTH SYSTEM!" << endl;
-    return 0;
+
+    PatientsLL patientsLinkedList;
+    DoctorsLL doctorsLinkedList;
+    AppointmentsLL appointmentsLinkedlist;
+
+    while (true){
+        display_menu();
+        int choice;
+        cout << "Enter your choice: ";
+        cin>>choice;
+
+        if(choice == 1){
+            int id;
+            string name, dob, gender;
+            cout<<"ID: ";
+            cin>>id;
+
+            //check if ID exists
+            PatientNode *patient_exists = patientsLinkedList.findPatient(id);
+            while (patient_exists != nullptr){
+                cerr<<"Patient with the same exists, try again:"<<endl;
+                cout<<"ID: ";
+                cin>>id;
+                patient_exists = patientsLinkedList.findPatient(id);
+            }
+            cout<<"Name: ";
+            cin>>name;
+            cout<<"DOB: ";
+            cin>>dob;
+            cout<<"Gender: ";
+            cin>>gender;
+            patientsLinkedList.addPatient(id, name, dob,gender);
+        }else if (choice == 2){
+            int id;
+            string name, specialization;
+            cout<<"ID: ";
+            cin>>id;
+
+            //check if ID exists
+            DoctorNode *doctor_exists = doctorsLinkedList.findDoctor(id);
+            while (doctor_exists != nullptr){
+                cerr<<"Doctor with the same exists, try again:"<<endl;
+                cout<<"ID: ";
+                cin>>id;
+                doctor_exists = doctorsLinkedList.findDoctor(id);
+            }
+            cout<<"Name: ";
+            cin>>name;
+            cout<<"Specialization: ";
+            cin>>specialization;
+            doctorsLinkedList.addDoctor(id, name, specialization);
+        }else if(choice == 3) {
+            int id, patient_id, doctor_id;
+            string date;
+            cout<<"ID: ";
+            cin>>id;
+
+            //check if ID exists
+            AppointmentNode *appointment_exists = appointmentsLinkedlist.finAppointment(id);
+            while (appointment_exists != nullptr){
+                cerr<<"Appointment with the same exists, try again: "<<endl;
+                cout<<"ID: ";
+                cin>>id;
+                appointment_exists = appointmentsLinkedlist.finAppointment(id);
+            }
+            cout<<"P_ID: ";
+            cin>>patient_id;
+
+            cout<<"D_ID: ";
+            cin>>doctor_id;
+
+            //check if patient_id exists
+            PatientNode* patient_exists = patientsLinkedList.findPatient(patient_id);
+            //check if doctor_id exists
+            DoctorNode* doctor_exists = doctorsLinkedList.findDoctor(doctor_id);
+
+            if(patient_exists == nullptr){
+                cerr<<"[FAILED] Patient ID does not exist"<<endl;
+            }
+            if(doctor_exists == nullptr){
+                cerr<<"[FAILED] Doctor ID does not exist"<<endl;
+            }
+
+            if(patient_exists == nullptr || doctor_exists == nullptr){
+                continue;
+            }
+
+            cout<<"DATE: ";
+            cin>>date;
+            appointmentsLinkedlist.addAppointment(id, doctor_id, patient_id, date);
+        }else if(choice == 4){
+            patientsLinkedList.displayPatients();
+        }else if(choice == 5){
+            doctorsLinkedList.displayDoctors();
+        }else if(choice == 6){
+            appointmentsLinkedlist.displayAppointments();
+        }else if(choice == 7){
+            break;
+        }else{
+            cout<<"Invalid input choice"<<endl;
+        }
+    }
 }
